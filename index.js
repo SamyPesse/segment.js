@@ -38,6 +38,7 @@ Segment.prototype.request = function(httpMethod, method, data, sync, callback) {
     var authHeader = 'Basic '+base64.encode(this.opts.writeKey);
 
     if (sync) {
+        console.log('sync flush');
         var res = new XMLHttpRequest();
         res.open(httpMethod.toUpperCase(), url, false);
         res.setRequestHeader('Authorization', authHeader);
@@ -105,13 +106,14 @@ Segment.prototype.flush = function(sync, callback) {
 };
 
 // Push an action to the server
-Segment.prototype.pushAction = function(action, callback) {
+Segment.prototype.pushAction = function(action, sync, callback) {
     this.pending.push({
         action: action,
         callback: callback
     });
 
-    this.deplayedFlush();
+    if (!sync) this.deplayedFlush();
+    else this.flush(true);
 };
 
 // Track an event
@@ -128,7 +130,8 @@ Segment.prototype.track = function(event, properties, options, callback) {
 
     options = _.defaults(options || {}, {
         userId: this.opts.userId,
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        syncFlush: false
     });
 
     this.pushAction({
@@ -137,7 +140,7 @@ Segment.prototype.track = function(event, properties, options, callback) {
         "event": event,
         "properties": properties,
         "timestamp": (new Date(options.timestamp)).toISOString()
-    }, callback);
+    }, options.syncFlush, callback);
 };
 
 // Identify an user
@@ -160,7 +163,8 @@ Segment.prototype.identify = function(userId, traits, options, callback) {
     if (!userId) throw new Error("identify requires an 'userId'");
 
     options = _.defaults(options || {}, {
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        syncFlush: false
     });
 
     this.pushAction({
@@ -168,7 +172,7 @@ Segment.prototype.identify = function(userId, traits, options, callback) {
         "userId": userId,
         "traits": traits,
         "timestamp": (new Date(options.timestamp)).toISOString()
-    }, callback);
+    }, options.syncFlush, callback);
 };
 
 
