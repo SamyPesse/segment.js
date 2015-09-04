@@ -12,7 +12,8 @@
     "dependencies": {
         "axios": "^0.5.4",
         "lodash": "^3.10.1",
-        "js-base64": "^2.1.9"
+        "js-base64": "^2.1.9",
+        "uid": "0.0.2"
     },
     "repository": {
         "type": "git",

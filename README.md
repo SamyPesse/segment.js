@@ -43,12 +43,6 @@ Default options are:
 }
 ```
 
-###### Difference with analytics.js
-
-:warning: Caution: `segment.js` doesn't act as `analytics.js` in the browser.
-
-`analytics.identify` doesn't set the `userId` for following tracked events and `analytics.track` only send given properties, no browser-specific properties are tracked.
-
 ###### Identify
 
 The identify method is how you tie one of your users to a recognizable userId and traits.
@@ -58,9 +52,12 @@ analytics.identify([userId], [traits], [options], [callback]);
 ```
 
 ```js
-analytics.identify('1e810c197e', {
-    name: 'Bill Lumbergh',
-    email: 'bill@initech.com'
+analytics.identify({
+    userId: '1e810c197e',
+    traits: {
+        name: 'Bill Lumbergh',
+        email: 'bill@initech.com'
+    }
 });
 ```
 
@@ -75,9 +72,12 @@ analytics.track(event, [properties], [options], [callback]);
 Here’s a basic example:
 
 ```js
-analytics.track('Signed Up', {
-    plan: 'Startup',
-    source: 'Analytics Academy'
+analytics.track({
+    event: 'Signed Up',
+    properties: {
+        plan: 'Startup',
+        source: 'Analytics Academy'
+    }
 });
 ```
 

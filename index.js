@@ -1,6 +1,10 @@
 var axios = require('axios');
+var assert = require('assert');
 var _ = require('lodash');
+var uid = require('uid');
 var base64 = require('js-base64').Base64;
+
+var pkg = require('./package.json');
 
 var Segment = function(opts) {
     if (!(this instanceof Segment)) return (new Segment(opts));
@@ -34,11 +38,10 @@ var Segment = function(opts) {
 // Execute an Segment HTTP API request
 Segment.prototype.request = function(httpMethod, method, data, sync, callback) {
     httpMethod = httpMethod.toLowerCase();
-    var url = this.opts.endpoint+'import';
-    var authHeader = 'Basic '+base64.encode(this.opts.writeKey);
+    var url = this.opts.endpoint+method;
+    var authHeader = 'Basic '+base64.encode(this.opts.writeKey+':');
 
     if (sync) {
-        console.log('sync flush');
         var res = new XMLHttpRequest();
         res.open(httpMethod.toUpperCase(), url, false);
         res.setRequestHeader('Authorization', authHeader);
@@ -52,7 +55,7 @@ Segment.prototype.request = function(httpMethod, method, data, sync, callback) {
     } else {
         axios({
             method: httpMethod,
-            url: this.opts.endpoint+'import',
+            url: url,
             headers: {
                 'Authorization': authHeader
             },
@@ -100,79 +103,48 @@ Segment.prototype.flush = function(sync, callback) {
 
     if (actions.length == 0) return finish();
 
-    this.request('post', 'import', {
-        batch: actions
+    this.request('post', 'batch', {
+        batch: actions,
+        timestamp: new Date(),
+        sentAt: new Date(),
+        messageId: uid(8)
     }, sync, finish);
 };
 
 // Push an action to the server
-Segment.prototype.pushAction = function(action, sync, callback) {
+Segment.prototype.enqueue = function(action, properties, callback) {
+    properties.context = _.extend(properties.context || {},{
+        library: {
+            name: pkg.name,
+            version: pkg.version
+        }
+    });
+    properties.timestamp = properties.timestamp || new Date();
+
+
     this.pending.push({
-        action: action,
+        action: _.extend(properties, {
+            action: action
+        }),
         callback: callback
     });
 
-    if (!sync) this.deplayedFlush();
-    else this.flush(true);
+    this.deplayedFlush();
 };
 
 // Track an event
-Segment.prototype.track = function(event, properties, options, callback) {
-    if (_.isFunction(properties)) {
-        callback = properties;
-        properties = {};
-        options = {};
-    }
-    if (_.isFunction(options)) {
-        callback = options;
-        options = {};
-    }
+Segment.prototype.track = function(event, callback) {
+    assert(event.event, 'You must pass an "event".');
+    assert(event.anonymousId || event.userId, 'You must pass either an "anonymousId" or a "userId".');
 
-    options = _.defaults(options || {}, {
-        userId: this.opts.userId,
-        timestamp: Date.now(),
-        syncFlush: false
-    });
-
-    this.pushAction({
-        "action": "track",
-        "userId": options.userId,
-        "event": event,
-        "properties": properties,
-        "timestamp": (new Date(options.timestamp)).toISOString()
-    }, options.syncFlush, callback);
+    this.enqueue('track', event, callback);
 };
 
 // Identify an user
-Segment.prototype.identify = function(userId, traits, options, callback) {
-    if (_.isObject(userId)) {
-        traits = userId;
-        userId = traits.userId;
-        delete traits.userId;
-    }
-    if (_.isFunction(traits)) {
-        callback = traits;
-        traits = {};
-        options = {};
-    }
-    if (_.isFunction(options)) {
-        callback = options;
-        options = {};
-    }
+Segment.prototype.identify = function(user, callback) {
+    assert(message.anonymousId || message.userId, 'You must pass either an "anonymousId" or a "userId".');
 
-    if (!userId) throw new Error("identify requires an 'userId'");
-
-    options = _.defaults(options || {}, {
-        timestamp: Date.now(),
-        syncFlush: false
-    });
-
-    this.pushAction({
-        "action": "identify",
-        "userId": userId,
-        "traits": traits,
-        "timestamp": (new Date(options.timestamp)).toISOString()
-    }, options.syncFlush, callback);
+    this.enqueue('identify', user, callback);
 };
 
 
