@@ -1,0 +1,21 @@
+{
+    "name": "segment.js",
+    "version": "0.0.0",
+    "main": "lib/index.js",
+    "author": "Samy Pessé <samypesse@gmail.com>",
+    "description": "Segment.com client for the browser and node.js",
+    "bugs": "https://github.com/SamyPesse/segment.js/issues",
+    "license": "Apache-2.0",
+    "engines": {
+        "node": ">=0.6"
+    },
+    "dependencies": {
+        "axios": "^0.5.4",
+        "lodash": "^3.10.1",
+        "q": "^1.4.1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/SamyPesse/segment.js.git"
+    }
+}
