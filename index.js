@@ -20,10 +20,7 @@ var Segment = function(opts) {
         flushWait: 1000,
 
         // The maximum time flush is allowed to be delayed before it’s invoked
-        flushMaxWait: 100,
-
-        // Default userId to use for tracking
-        userId: null
+        flushMaxWait: 100
     });
 
     this.pending = [];
