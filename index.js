@@ -20,6 +20,47 @@ var Segment = function(opts) {
     });
 };
 
+// Execute an Segment HTTP API request
+Segment.prototype.request = function(httpMethod, method, data, sync, callback) {
+    httpMethod = httpMethod.toLowerCase();
+    var url = this.opts.endpoint+'import';
+    var authHeader = 'Basic '+base64.encode(this.opts.writeKey);
+
+    if (sync) {
+        var res = new XMLHttpRequest();
+        res.open(httpMethod.toUpperCase(), url, false);
+        res.setRequestHeader('Authorization', authHeader);
+        res.send((data && httpMethod == 'post')? JSON.stringify(data) : null);
+
+        if (res.status === 200) {
+            callback();
+        } else {
+            callback(new Error('Error '+res.status));
+        }
+    } else {
+        axios({
+            method: httpMethod,
+            url: this.opts.endpoint+'import',
+            headers: {
+                'Authorization': authHeader
+            },
+            data: data
+        })
+        .then(function(res) {
+            var err = undefined;
+
+            if (res && res.status !== 200) {
+                err = new Error('Error '+res.status);
+                err.res = res;
+            }
+
+            callback(err);
+        }, function(err) {
+            callback(err);
+        });
+    }
+}
+
 // Flush pending actions to be sent to the server
 Segment.prototype.flush = function(sync, callback) {
     if (_.isFunction(sync)) {
@@ -47,28 +88,9 @@ Segment.prototype.flush = function(sync, callback) {
 
     if (actions.length == 0) return finish();
 
-    axios({
-        method: 'post',
-        url: this.opts.endpoint+'import',
-        headers: {
-            'Authorization': 'Basic '+base64.encode(this.opts.writeKey)
-        },
-        data: {
-            batch: actions
-        }
-    })
-    .then(function(res) {
-        var err = undefined;
-
-        if (res && res.status !== 200) {
-            err = new Error('Error importing events '+res.status);
-            err.res = res;
-        }
-
-        finish(err);
-    }, function(err) {
-        finish(err);
-    });
+    this.request('post', 'import', {
+        batch: actions
+    }, sync, finish);
 };
 
 // Push an action to the server

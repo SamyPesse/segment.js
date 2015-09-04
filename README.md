@@ -22,9 +22,9 @@ var analytics = new Segment({
 });
 ```
 
-###### :warning: Difference with analytics.js
+###### Difference with analytics.js
 
-`segment.js` doesn't act as `analytics.js` in the browser.
+:warning: Caution: `segment.js` doesn't act as `analytics.js` in the browser.
 
 `analytics.identify` doesn't set the `userId` for following tracked events and `analytics.track` only send given properties, no browser-specific properties are tracked.
 
