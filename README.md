@@ -44,10 +44,6 @@ Default options are:
 
 The identify method is how you tie one of your users to a recognizable userId and traits.
 
-```
-analytics.identify([userId], [traits], [options], [callback]);
-```
-
 ```js
 analytics.identify({
     userId: '1e810c197e',
@@ -60,13 +56,7 @@ analytics.identify({
 
 ###### Track
 
-The track method lets you record any actions your users perform.
-
-```
-analytics.track(event, [properties], [options], [callback]);
-```
-
-Here’s a basic example:
+The track method lets you record any actions your users perform. Here’s a basic example:
 
 ```js
 analytics.track({
