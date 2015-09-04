@@ -3,6 +3,8 @@ var _ = require('lodash');
 var base64 = require('js-base64').Base64;
 
 var Segment = function(opts) {
+    if (!(this instanceof Segment)) return (new Segment(opts));
+
     this.opts = _.defaults(opts || {}, {
         // Endpoint for the Segment.com API
         endpoint: 'https://api.segment.io/v1/',
