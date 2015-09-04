@@ -22,6 +22,27 @@ var analytics = new Segment({
 });
 ```
 
+Default options are:
+
+```js
+{
+    // Endpoint for the Segment.com API
+    endpoint: 'https://api.segment.io/v1/',
+
+    // Write key for your project
+    writeKey: "",
+
+    // The number of milliseconds to delay flushing events
+    flushWait: 1000,
+
+    // The maximum time flush is allowed to be delayed before it’s invoked
+    flushMaxWait: 100,
+
+    // Default userId to use for tracking
+    userId: null
+}
+```
+
 ###### Difference with analytics.js
 
 :warning: Caution: `segment.js` doesn't act as `analytics.js` in the browser.

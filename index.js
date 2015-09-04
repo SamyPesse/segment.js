@@ -4,11 +4,20 @@ var base64 = require('js-base64').Base64;
 
 var Segment = function(opts) {
     this.opts = _.defaults(opts || {}, {
+        // Endpoint for the Segment.com API
         endpoint: 'https://api.segment.io/v1/',
+
+        // Write key for your project
         writeKey: "",
 
+        // The number of milliseconds to delay flushing events
         flushWait: 1000,
-        flushMaxWait: 10
+
+        // The maximum time flush is allowed to be delayed before it’s invoked
+        flushMaxWait: 100,
+
+        // Default userId to use for tracking
+        userId: null
     });
 
     this.pending = [];
@@ -116,7 +125,7 @@ Segment.prototype.track = function(event, properties, options, callback) {
     }
 
     options = _.defaults(options || {}, {
-        userId: null,
+        userId: this.opts.userId,
         timestamp: Date.now()
     });
 
