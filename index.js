@@ -1,6 +1,5 @@
 var axios = require('axios');
 var _ = require('lodash');
-var Q = require('q');
 var base64 = require('js-base64').Base64;
 
 var Segment = function(opts) {
@@ -22,23 +21,33 @@ var Segment = function(opts) {
 };
 
 // Flush pending actions to be sent to the server
-Segment.prototype.flush = function(sync) {
+Segment.prototype.flush = function(sync, callback) {
+    if (_.isFunction(sync)) {
+        callback = sync;
+        sync = false;
+    }
+
     var topush = this.pending;
     this.pending = [];
 
     var actions = _.pluck(topush, 'action');
     var callbacks = _.chain(topush)
         .pluck('callback')
+        .concat([
+            callback
+        ])
         .compact()
         .value();
 
     var finish = function(err) {
-        _.each(callbacks, function(callback) {
-            callback(err);
+        _.each(callbacks, function(cb) {
+            cb(err);
         });
     };
 
-    return Q(axios({
+    if (actions.length == 0) return finish();
+
+    axios({
         method: 'post',
         url: this.opts.endpoint+'import',
         headers: {
@@ -47,7 +56,7 @@ Segment.prototype.flush = function(sync) {
         data: {
             batch: actions
         }
-    }))
+    })
     .then(function(res) {
         var err = undefined;
 
@@ -115,7 +124,7 @@ Segment.prototype.identify = function(userId, traits, options, callback) {
         options = {};
     }
 
-    if (!userId) return Q.reject(new Error("identify requires an 'userId'"));
+    if (!userId) throw new Error("identify requires an 'userId'");
 
     options = _.defaults(options || {}, {
         timestamp: Date.now()

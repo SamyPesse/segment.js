@@ -22,6 +22,12 @@ var analytics = new Segment({
 });
 ```
 
+###### :warning: Difference with analytics.js
+
+`segment.js` doesn't act as `analytics.js` in the browser.
+
+`analytics.identify` doesn't set the `userId` for following tracked events and `analytics.track` only send given properties, no browser-specific properties are tracked.
+
 ###### Identify
 
 The identify method is how you tie one of your users to a recognizable userId and traits.
@@ -36,8 +42,6 @@ analytics.identify('1e810c197e', {
     email: 'bill@initech.com'
 });
 ```
-
-:warning: `analytics.identify` doesn't set the `userId` for following `analytics.track`.
 
 ###### Track
 
@@ -56,6 +60,20 @@ analytics.track('Signed Up', {
 });
 ```
 
-:warning: `analytics.track` only send given properties, no browser-specific properties are tracked.
+###### Flush
 
+You can manually flush events to Segment.com using the `analytics.flush([sync])` method:
+
+```js
+analytics.flush();
+```
+
+It's also possible in the browser to synchronously send events, for example:
+
+```js
+window.onbeforeunload = function() {
+    analytics.track('Page Closed');
+    analytics.flush(true);
+};
+```
 
