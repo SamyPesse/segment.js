@@ -6,7 +6,7 @@ var base64 = require('js-base64').Base64;
 
 var pkg = require('./package.json');
 
-var Segment = function(opts) {
+function Segment(opts) {
     if (!(this instanceof Segment)) return (new Segment(opts));
 
     this.opts = _.defaults(opts || {}, {
@@ -26,11 +26,11 @@ var Segment = function(opts) {
     this.pending = [];
 
 
-    _.bindAll(this);
+    _.bindAll(this, _.functionsIn(this));
     this.deplayedFlush = _.debounce(this.flush, this.opts.flushWait, {
         maxWait: this.flushMaxWait
     });
-};
+}
 
 // Execute an Segment HTTP API request
 Segment.prototype.request = function(httpMethod, method, data, sync, callback) {
@@ -83,9 +83,9 @@ Segment.prototype.flush = function(sync, callback) {
     var topush = this.pending;
     this.pending = [];
 
-    var actions = _.pluck(topush, 'action');
+    var actions = _.map(topush, 'action');
     var callbacks = _.chain(topush)
-        .pluck('callback')
+        .map('callback')
         .concat([
             callback
         ])
